@@ -1,0 +1,52 @@
+.backdrop {
+    background: #0d121c;
+    position: absolute;
+    top: 0px;
+    right:0px;
+    bottom:0px;
+    left:0px;
+}
+
+.align-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0px;
+    margin-top: 40px;
+}
+
+.card-img{
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+
+.card-label{
+    color: #7f7f7f;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none!important;
+}
+
+a:-webkit-any-link {
+    text-decoration: none;
+}
+
+.card {
+    background: #141924;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 8px;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.card:hover{
+    cursor: pointer;
+}
