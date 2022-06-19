@@ -5,6 +5,13 @@ import {
 
 export const NETWORKS = [
     {
+        name: Networks.BSC.name,
+        chainId: Networks.BSC.chainId,
+        symbol: Networks.BSC.id,
+        network: Networks.BSC,
+        provider: 'https://polygon-mainnet.g.alchemy.com/v2/OEE0i1sGNBGkR3nmn0lc8AqtVt1iJEal',
+    },
+    {
         name: Networks.POLYGON.name,
         chainId: Networks.POLYGON.chainId,
         symbol: Networks.POLYGON.id,

@@ -5,14 +5,13 @@ import {
 import axios from "axios";
 import { BASE_URL } from '../config/variables';
 import {ContractTransaction} from "@ethersproject/contracts"; // PopulatedTransaction
-const {REACT_APP_SIGNATURE} = process.env;
+const {REACT_APP_SIGNATURE,REACT_APP_SCALEX_ADDRESS} = process.env;
 
 export const executeTransaction = async(
     signer: any, network: any, provider: any, 
     tokenFrom: any, tokenTo: any, amountFrom: any, chainIdTo: number,
     ) => {
 
-    console.log('executeTransaction=========',tokenFrom,tokenTo,amountFrom,chainIdTo,network);
     console.log('the tokens',signer);
     
     // Initialize Bridge
@@ -22,12 +21,17 @@ export const executeTransaction = async(
     });
 
     // get minimum desired output
-    const { amountToReceive } = await SYNAPSE_BRIDGE.estimateBridgeTokenOutput({
+    const data = await SYNAPSE_BRIDGE.estimateBridgeTokenOutput({
         tokenFrom,      // token to send from the source chain, in this case nUSD on Avalanche
         chainIdTo,     // Chain ID of the destination chain, in this case BSC
         tokenTo,     // Token to be received on the destination chain, in this case USDC
         amountFrom,  // Amount of `tokenFrom` being sent
     });
+
+    const { amountToReceive } = data
+    console.log({amountFrom});
+    console.log({data});
+    console.log({amountToReceive});
     
     try {
         // build and execute an ERC20 Approve transaction so that the Synapse Bridge contract
@@ -35,7 +39,8 @@ export const executeTransaction = async(
         // If desired, `amount` can be passed in the args object, which overrides
         // the default behavior of "infinite approval" for the token.
         let approveTxn: ContractTransaction = await SYNAPSE_BRIDGE.executeApproveTransaction({
-            token: tokenFrom
+            token: tokenFrom,
+            amount: amountFrom
         }, signer);
 
         // Wait for at least one confirmation on the sending chain, this is an optional
@@ -46,7 +51,7 @@ export const executeTransaction = async(
         console.log(`ERC20 Approve transaction block number: ${approveTxn.blockNumber}`);
     } catch (err) {
         // deal with the caught error accordingly
-        console.log('error finishing oo',err);
+        console.log('error approving transaction oo',err);
     }
     
     try {
@@ -58,11 +63,12 @@ export const executeTransaction = async(
         // NOTE: executeBridgeTokenTransaction performs the step of actually sending/broadcasting the signed
         // transaction on the source chain.
         let bridgeTxn: ContractTransaction = await SYNAPSE_BRIDGE.executeBridgeTokenTransaction({
-            tokenFrom,        // token to send from the source chain, in this case nUSD on Avalanche
-            chainIdTo,       // Chain ID of the destination chain, in this case BSC
+            tokenFrom,     // token to send from the source chain, in this case nUSD on Avalanche
+            chainIdTo,     // Chain ID of the destination chain, in this case BSC
             tokenTo,       // Token to be received on the destination chain, in this case USDC
             amountFrom,    // Amount of `tokenFrom` being sent
             amountTo: amountToReceive, // minimum desired amount of `tokenTo` to receive on the destination chain
+            addressTo: REACT_APP_SCALEX_ADDRESS
         }, signer);
 
         // Wait for at least one confirmation on the sending chain, this is an optional
@@ -70,7 +76,9 @@ export const executeTransaction = async(
         await bridgeTxn.wait(1);
 
         console.log(`Bridge transaction hash: ${bridgeTxn.hash}`);
+        console.log({bridgeTxn});
         console.log(`Bridge transaction block number: ${bridgeTxn.blockNumber}`);
+        return bridgeTxn;
     } catch (err) {
         // deal with the caught error accordingly
         console.log('some errors occured man',err);

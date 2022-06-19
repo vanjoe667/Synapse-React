@@ -45,15 +45,23 @@ const BridgeCard = () => {
             // WalletConnect functions goes here... (synapse does not support WalletConnect)
             return;
         }
+
+        console.log('the nework',net?.network);
+        
         const tx = await executeTransaction(
             signer,net?.network, net?.provider,
             token === Tokens.USDT.name ? Tokens.USDT : Tokens.USDC, 
-            Tokens.USDC, parseUnits("1000", Number(tokenToBeReceived.decimals(Number(net?.chainId || 1)))),
+            Tokens.USDC, 
+            parseUnits(String(amount), Number(tokenToBeReceived.decimals(Number(net?.chainId)))),
             Number(Networks.BSC.chainId)
         );
 
         console.log({tx});
-        if (tx === undefined) alert('Transaction failed');
+        if (tx === undefined) {
+            alert('Transaction failed');
+            setSpinner(false);
+            return;
+        }
         
         const ramp = await offramp(address,token,amount);
         if(ramp) {
